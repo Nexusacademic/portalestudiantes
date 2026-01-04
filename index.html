@@ -140,22 +140,10 @@
             <div class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar relative">
                 
                 <!-- === SECCIÓN INICIO === -->
-                <div id="section-home" class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 fade-in">
+                <!-- COLUMNA IZQUIERDA ELIMINADA: Diseño más limpio a una sola columna -->
+                <div id="section-home" class="max-w-7xl mx-auto flex flex-col gap-8 fade-in">
                     
-                    <!-- COLUMNA IZQUIERDA -->
-                    <div class="w-full lg:w-80 flex flex-col gap-6 shrink-0">
-                        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center text-center relative overflow-hidden group">
-                            <div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-br from-slate-100 to-slate-200 z-0"></div>
-                            <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-4 border-[6px] border-white shadow-md relative z-10 text-3xl font-bold text-slate-300">
-                                <span id="profile-initials">--</span>
-                            </div>
-                            <div class="relative z-10 w-full">
-                                <h5 id="profile-fullname" class="font-bold text-slate-800 text-lg leading-tight">---</h5>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- COLUMNA DERECHA -->
+                    <!-- COLUMNA ÚNICA (Banner + Académico) -->
                     <div class="flex-1 flex flex-col gap-6">
                         
                         <!-- Banner Bienvenida -->
@@ -177,7 +165,7 @@
                         </div>
 
                         <!-- Grid Académico -->
-                        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 flex-1">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
                             <!-- Horarios -->
                             <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
                                 <h4 class="font-bold text-slate-800 flex items-center gap-3 mb-6 text-sm uppercase tracking-wide">
@@ -520,11 +508,10 @@
             document.getElementById('stat-present').innerText = present;
             document.getElementById('stat-late').innerText = late;
             document.getElementById('stat-absent').innerText = absent;
-            document.getElementById('stat-present-big').innerText = present;
-            
             if (total > 0) {
-                const percentage = (present / total) * 100;
-                document.getElementById('ring-present').setAttribute('stroke-dasharray', `${percentage}, 100`);
+                document.getElementById('bar-present').style.width = `${(present/total)*100}%`;
+                document.getElementById('bar-late').style.width = `${(late/total)*100}%`;
+                document.getElementById('bar-absent').style.width = `${(absent/total)*100}%`;
             }
         }
         
