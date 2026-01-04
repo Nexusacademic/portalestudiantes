@@ -21,6 +21,12 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 20px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Estilos para el calendario */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; }
+        .calendar-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500; color: #64748b; }
+        .calendar-day.active { background-color: #2563eb; color: white; font-weight: 700; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3); }
+        .calendar-head { text-align: center; font-size: 0.75rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; padding-bottom: 0.5rem; }
     </style>
 </head>
 <body class="text-slate-600 h-screen overflow-hidden flex flex-col selection:bg-blue-100 selection:text-blue-900">
@@ -81,13 +87,11 @@
             <nav class="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
                 <div class="hidden lg:block text-xs font-bold text-slate-400 uppercase tracking-wider px-4 mb-2 mt-4">Principal</div>
                 
-                <!-- BOTÓN INICIO (Muestra sección Home) -->
                 <button onclick="showSection('home')" id="nav-home" class="w-full flex items-center gap-4 px-4 py-3.5 bg-blue-50/80 text-blue-700 rounded-2xl transition-all font-semibold text-sm group border border-blue-100">
                     <i data-lucide="layout-grid" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                     <span class="hidden lg:block">Panel de Control</span>
                 </button>
                 
-                <!-- BOTÓN PAGOS (Muestra sección Pagos) -->
                 <button onclick="showSection('payments')" id="nav-payments" class="w-full flex items-center gap-4 px-4 py-3.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 rounded-2xl transition-all font-medium text-sm group">
                     <i data-lucide="credit-card" class="w-5 h-5 group-hover:scale-110 transition-transform text-slate-400 group-hover:text-emerald-500"></i>
                     <span class="hidden lg:block">Mis Pagos</span>
@@ -110,7 +114,7 @@
         <!-- MAIN CONTENT -->
         <main class="flex-1 flex flex-col overflow-hidden relative">
             
-            <!-- HEADER MODIFICADO: AÑADIDO ESTADO ACTIVO -->
+            <!-- HEADER -->
             <header class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200/60 flex items-center justify-between px-6 lg:px-10 shrink-0 sticky top-0 z-20">
                 <div>
                     <h2 class="text-xl font-bold text-slate-800 font-oswald hidden md:block">Mi Aula Virtual</h2>
@@ -135,10 +139,10 @@
             <!-- SCROLLABLE CONTENT AREA -->
             <div class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar relative">
                 
-                <!-- === SECCIÓN INICIO (VISIBLE POR DEFECTO) === -->
+                <!-- === SECCIÓN INICIO === -->
                 <div id="section-home" class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 fade-in">
                     
-                    <!-- COLUMNA IZQUIERDA (Perfil LIMPIO) -->
+                    <!-- COLUMNA IZQUIERDA -->
                     <div class="w-full lg:w-80 flex flex-col gap-6 shrink-0">
                         <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center text-center relative overflow-hidden group">
                             <div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-br from-slate-100 to-slate-200 z-0"></div>
@@ -147,7 +151,6 @@
                             </div>
                             <div class="relative z-10 w-full">
                                 <h5 id="profile-fullname" class="font-bold text-slate-800 text-lg leading-tight mb-4">---</h5>
-                                <!-- ETIQUETA 'ESTUDIANTE ACTIVO' ELIMINADA DE AQUÍ -->
                                 <div class="w-full pt-4 border-t border-slate-50">
                                     <div class="text-center">
                                         <div class="text-xs text-slate-400 font-semibold uppercase">Nivel</div>
@@ -158,7 +161,7 @@
                         </div>
                     </div>
 
-                    <!-- COLUMNA DERECHA (Banner + Académico) -->
+                    <!-- COLUMNA DERECHA -->
                     <div class="flex-1 flex flex-col gap-6">
                         
                         <!-- Banner Bienvenida -->
@@ -168,11 +171,13 @@
                                     <h3 class="text-3xl font-bold font-oswald mb-2">¡Bienvenido! 👋</h3>
                                     <p class="text-slate-300 text-sm max-w-md leading-relaxed">¿Listo para mejorar tu ajedrez hoy? Revisa tu horario y prepárate para tu próxima clase.</p>
                                 </div>
-                                <button class="px-5 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">
+                                <!-- BOTÓN MODIFICADO PARA ABRIR CALENDARIO -->
+                                <button onclick="toggleCalendar(true)" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2">
+                                    <i data-lucide="calendar" class="w-4 h-4"></i>
                                     Ver Calendario
                                 </button>
                             </div>
-                            <!-- LOGO BLANCO MARCA DE AGUA -->
+                            <!-- Logo y Decoración -->
                             <img src="https://i.postimg.cc/xTd0NgKW/NEXUS-CHESS-BLANCO.png" class="absolute -right-10 -bottom-16 w-64 h-64 opacity-[0.07] rotate-12 object-contain pointer-events-none group-hover:scale-105 transition-transform duration-700">
                             <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 blur-[80px] rounded-full pointer-events-none"></div>
                         </div>
@@ -243,7 +248,7 @@
                     </div>
                 </div>
 
-                <!-- === SECCIÓN PAGOS (OCULTA POR DEFECTO) === -->
+                <!-- === SECCIÓN PAGOS === -->
                 <div id="section-payments" class="hidden max-w-4xl mx-auto fade-in h-full flex-col justify-center">
                     <div class="bg-white p-8 rounded-3xl shadow-lg border border-slate-100 flex flex-col md:flex-row gap-8 items-center">
                         <div class="w-full md:w-1/2">
@@ -274,7 +279,6 @@
                         </div>
                         
                         <div class="w-full md:w-1/2 flex justify-center">
-                             <!-- Ilustración o Icono Grande -->
                              <div class="w-64 h-64 bg-slate-50 rounded-full flex items-center justify-center relative overflow-hidden border-4 border-white shadow-inner">
                                 <i data-lucide="credit-card" class="w-32 h-32 text-slate-200"></i>
                                 <div class="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-transparent"></div>
@@ -290,11 +294,45 @@
         </main>
     </div>
 
+    <!-- MODAL CALENDARIO -->
+    <div id="calendar-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center fade-in">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="toggleCalendar(false)"></div>
+        <div class="relative bg-white rounded-3xl p-6 shadow-2xl w-full max-w-sm mx-4 transform transition-all scale-100 overflow-hidden">
+            <!-- Cabecera del calendario -->
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h4 class="text-xl font-bold text-slate-800 font-oswald">ENERO 2026</h4>
+                    <p class="text-xs text-blue-600 font-bold uppercase tracking-wider">Tus Clases: Lun y Mié</p>
+                </div>
+                <button onclick="toggleCalendar(false)" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            
+            <!-- Grid del Calendario -->
+            <div class="calendar-grid mb-2">
+                <div class="calendar-head">Lu</div>
+                <div class="calendar-head">Ma</div>
+                <div class="calendar-head">Mi</div>
+                <div class="calendar-head">Ju</div>
+                <div class="calendar-head">Vi</div>
+                <div class="calendar-head">Sa</div>
+                <div class="calendar-head">Do</div>
+            </div>
+            <div id="calendar-days" class="calendar-grid">
+                <!-- Se llena con JS -->
+            </div>
+            
+            <div class="mt-6 pt-4 border-t border-slate-100 text-center">
+                <p class="text-xs text-slate-400">Las fechas marcadas en <span class="text-blue-600 font-bold">azul</span> son tus días de clase.</p>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // --- TU CONFIGURACIÓN DE FIREBASE (YA PEGADA) ---
         const firebaseConfig = {
             apiKey: "AIzaSyB_JqJuavM7TBvnuWtFW55wxqFSWMxrk3Q",
             authDomain: "nexus-chess-base-general.firebaseapp.com",
@@ -305,32 +343,75 @@
             appId: "1:521727118362:web:0ac3549eec2a67009595a3",
             measurementId: "G-44QJGQQ2FC"
         };
-        // ----------------------------------------------
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // VARIABLES GLOBALES
         window.systemData = null;
         window.currentUser = null;
 
-        // CONEXIÓN EN TIEMPO REAL
         const dbRef = ref(db, 'academy_v1');
         onValue(dbRef, (snapshot) => {
             const data = snapshot.val();
             if (data) {
                 window.systemData = data;
-                checkSession(); // Revisa si ya había sesión abierta
+                checkSession(); 
             }
         });
 
-        // SISTEMA DE NAVEGACIÓN SIMPLE
+        // FUNCIONES DEL CALENDARIO
+        window.toggleCalendar = function(show) {
+            const modal = document.getElementById('calendar-modal');
+            if(show) {
+                modal.classList.remove('hidden');
+                renderCalendarJan2026();
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        window.renderCalendarJan2026 = function() {
+            const daysContainer = document.getElementById('calendar-days');
+            daysContainer.innerHTML = '';
+
+            // Enero 2026
+            // 1 de Enero 2026 es Jueves (Thursday).
+            // En JS getDay(): 0=Dom, 1=Lun, 2=Mar, 3=Mie, 4=Jue, 5=Vie, 6=Sab.
+            // Para cuadrar con nuestro grid (Lu, Ma, Mi, Ju, Vi, Sa, Do), Jueves es la 4ta columna (indice 3 si empezamos en 0).
+            // Grid columns: 0:Lu, 1:Ma, 2:Mi, 3:Ju, 4:Vi, 5:Sa, 6:Do.
+            
+            const startDayIndex = 3; // Jueves
+            const totalDays = 31;
+
+            // Rellenar espacios vacíos antes del día 1
+            for(let i = 0; i < startDayIndex; i++) {
+                const empty = document.createElement('div');
+                daysContainer.appendChild(empty);
+            }
+
+            // Días del mes
+            for(let day = 1; day <= totalDays; day++) {
+                const dayEl = document.createElement('div');
+                dayEl.innerText = day;
+                dayEl.className = 'calendar-day';
+                
+                // Calcular día de la semana para resaltar Lunes (0) y Miércoles (2) en nuestro grid visual
+                // Indice absoluto visual = (startDayIndex + day - 1) % 7
+                const currentWeekDay = (startDayIndex + day - 1) % 7;
+                
+                // 0=Lu, 1=Ma, 2=Mi, 3=Ju, 4=Vi, 5=Sa, 6=Do
+                if (currentWeekDay === 0 || currentWeekDay === 2) { // Lunes o Miércoles
+                    dayEl.classList.add('active');
+                }
+
+                daysContainer.appendChild(dayEl);
+            }
+        }
+
         window.showSection = function(sectionId) {
-            // Ocultar todas las secciones
             document.getElementById('section-home').classList.add('hidden');
             document.getElementById('section-payments').classList.add('hidden');
             
-            // Desactivar estilos de botones
             const btnHome = document.getElementById('nav-home');
             const btnPay = document.getElementById('nav-payments');
             
@@ -340,21 +421,18 @@
             btnPay.classList.remove('bg-blue-50/80', 'text-blue-700', 'border-blue-100');
             btnPay.classList.add('text-slate-500', 'hover:bg-slate-50', 'hover:text-slate-800');
 
-            // Mostrar sección seleccionada y activar botón
             if(sectionId === 'home') {
                 document.getElementById('section-home').classList.remove('hidden');
                 btnHome.classList.add('bg-blue-50/80', 'text-blue-700', 'border-blue-100');
                 btnHome.classList.remove('text-slate-500', 'hover:bg-slate-50', 'hover:text-slate-800');
             } else if (sectionId === 'payments') {
                 document.getElementById('section-payments').classList.remove('hidden');
-                // Hacemos que payments se vea flex cuando se activa
                 document.getElementById('section-payments').classList.add('flex'); 
                 btnPay.classList.add('bg-blue-50/80', 'text-blue-700', 'border-blue-100');
                 btnPay.classList.remove('text-slate-500', 'hover:bg-slate-50', 'hover:text-slate-800');
             }
         }
 
-        // SISTEMA DE LOGIN
         window.handleLogin = function(e) {
             e.preventDefault();
             const code = document.getElementById('login-code').value.trim();
