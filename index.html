@@ -140,7 +140,6 @@
             <div class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar relative">
                 
                 <!-- === SECCIÓN INICIO === -->
-                <!-- COLUMNA IZQUIERDA ELIMINADA: Diseño más limpio a una sola columna -->
                 <div id="section-home" class="max-w-7xl mx-auto flex flex-col gap-8 fade-in">
                     
                     <!-- COLUMNA ÚNICA (Banner + Académico) -->
@@ -358,30 +357,22 @@
 
             // Enero 2026
             // 1 de Enero 2026 es Jueves (Thursday).
-            // En JS getDay(): 0=Dom, 1=Lun, 2=Mar, 3=Mie, 4=Jue, 5=Vie, 6=Sab.
-            // Para cuadrar con nuestro grid (Lu, Ma, Mi, Ju, Vi, Sa, Do), Jueves es la 4ta columna (indice 3 si empezamos en 0).
-            // Grid columns: 0:Lu, 1:Ma, 2:Mi, 3:Ju, 4:Vi, 5:Sa, 6:Do.
-            
             const startDayIndex = 3; // Jueves
             const totalDays = 31;
 
-            // Rellenar espacios vacíos antes del día 1
             for(let i = 0; i < startDayIndex; i++) {
                 const empty = document.createElement('div');
                 daysContainer.appendChild(empty);
             }
 
-            // Días del mes
             for(let day = 1; day <= totalDays; day++) {
                 const dayEl = document.createElement('div');
                 dayEl.innerText = day;
                 dayEl.className = 'calendar-day';
                 
-                // Calcular día de la semana para resaltar Lunes (0) y Miércoles (2) en nuestro grid visual
-                // Indice absoluto visual = (startDayIndex + day - 1) % 7
+                // 0=Lu, 1=Ma, 2=Mi, 3=Ju, 4=Vi, 5=Sa, 6=Do
                 const currentWeekDay = (startDayIndex + day - 1) % 7;
                 
-                // 0=Lu, 1=Ma, 2=Mi, 3=Ju, 4=Vi, 5=Sa, 6=Do
                 if (currentWeekDay === 0 || currentWeekDay === 2) { // Lunes o Miércoles
                     dayEl.classList.add('active');
                 }
@@ -463,13 +454,22 @@
             document.getElementById('main-app').classList.remove('hidden');
             document.getElementById('main-app').classList.add('fade-in');
 
-            document.getElementById('header-name').innerText = `${student.studentName} ${student.studentLastName}`;
-            document.getElementById('header-code').innerText = student.discountCode || `STU-${student.id}`;
-            document.getElementById('profile-fullname').innerText = `${student.studentName} ${student.studentLastName}`;
-            document.getElementById('profile-initials').innerText = student.studentName.charAt(0) + student.studentLastName.charAt(0);
-            document.getElementById('dash-schedule').innerText = student.schedule;
-            document.getElementById('dash-modality').innerText = `Modalidad ${student.modality}`;
+            // --- PROTECCIÓN DE DATOS ---
+            const fName = student.studentName || '';
+            const lName = student.studentLastName || '';
             
+            document.getElementById('header-name').innerText = `${fName} ${lName}`;
+            document.getElementById('header-code').innerText = student.discountCode || `STU-${student.id}`;
+            
+            // --- HORARIO: INTENTA LEER 'schedule' O 'horario' O MUESTRA MENSAJE POR DEFECTO ---
+            const scheduleText = student.schedule || student.horario || 'Por definir';
+            document.getElementById('dash-schedule').innerText = scheduleText;
+            
+            // --- MODALIDAD ---
+            const modalityText = student.modality || 'Presencial'; 
+            document.getElementById('dash-modality').innerText = `Modalidad ${modalityText}`;
+            
+            // --- ENLACE DE CLASE ---
             let classInfo = null;
             if (window.systemData.classrooms) {
                 classInfo = window.systemData.classrooms.find(c => c.id === student.assignedClassId);
@@ -488,8 +488,12 @@
                 document.getElementById('no-link-msg').classList.remove('hidden');
             }
 
+            // --- PAGOS ---
             document.getElementById('dash-renewal').innerText = student.renewalDate || '---';
-            document.getElementById('dash-amount').innerText = student.paymentAmount.toFixed(2);
+            // Protección para paymentAmount
+            const amount = student.paymentAmount !== undefined ? student.paymentAmount : 0;
+            document.getElementById('dash-amount').innerText = Number(amount).toFixed(2);
+            
             calculateAttendance(student.id);
             lucide.createIcons();
         }
@@ -508,10 +512,13 @@
             document.getElementById('stat-present').innerText = present;
             document.getElementById('stat-late').innerText = late;
             document.getElementById('stat-absent').innerText = absent;
+            
+            // Protección para la barra de progreso
             if (total > 0) {
-                document.getElementById('bar-present').style.width = `${(present/total)*100}%`;
-                document.getElementById('bar-late').style.width = `${(late/total)*100}%`;
-                document.getElementById('bar-absent').style.width = `${(absent/total)*100}%`;
+                const percentage = (present / total) * 100;
+                document.getElementById('ring-present').setAttribute('stroke-dasharray', `${percentage}, 100`);
+            } else {
+                document.getElementById('ring-present').setAttribute('stroke-dasharray', `0, 100`);
             }
         }
         
