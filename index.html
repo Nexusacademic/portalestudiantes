@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal del Estudiante | Nexus Chess</title>
-    <!-- FAVICON -->
     <link rel="icon" type="image/png" href="https://i.postimg.cc/xTd0NgKW/NEXUS-CHESS-BLANCO.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,7 +30,6 @@
 </head>
 <body class="text-slate-600 h-screen overflow-hidden flex flex-col selection:bg-blue-100 selection:text-blue-900">
 
-    <!-- LOGIN SCREEN -->
     <div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900 bg-[url('https://images.unsplash.com/photo-1529699211952-734e80c4d42b?q=80&w=2071&auto=format&fit=crop')] bg-cover bg-center">
         <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm"></div>
         <div class="relative w-full max-w-md p-10 bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl mx-4 fade-in border border-white/20">
@@ -74,10 +72,8 @@
         </div>
     </div>
 
-    <!-- MAIN APP LAYOUT -->
     <div id="main-app" class="hidden flex h-full bg-[#f8fafc]">
         
-        <!-- SIDEBAR -->
         <aside class="w-20 lg:w-72 bg-white border-r border-slate-200 flex flex-col shrink-0 z-30 transition-all duration-300 shadow-sm">
             <div class="h-20 flex items-center justify-center lg:justify-start lg:px-8 border-b border-slate-100">
                 <img src="https://i.postimg.cc/7ZMDp79f/LOGO-PNG-NEXUS-CHESS-sin-letras.png" alt="Nexus Chess Logo" class="w-10 h-10 object-contain shrink-0 filter drop-shadow-md">
@@ -97,6 +93,11 @@
                     <span class="hidden lg:block">Mis Pagos</span>
                 </button>
 
+                <a id="nav-recorded" href="#" target="_blank" class="flex items-center gap-4 px-4 py-3.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 rounded-2xl transition-all font-medium text-sm group">
+                    <i data-lucide="play-circle" class="w-5 h-5 group-hover:scale-110 transition-transform text-slate-400 group-hover:text-red-500"></i>
+                    <span class="hidden lg:block">Clases Grabadas</span>
+                </a>
+
                 <a href="https://lichess.org/" target="_blank" class="flex items-center gap-4 px-4 py-3.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 rounded-2xl transition-all font-medium text-sm group">
                     <i data-lucide="swords" class="w-5 h-5 group-hover:scale-110 transition-transform text-slate-400 group-hover:text-slate-900"></i>
                     <span class="hidden lg:block">Practicar (Lichess)</span>
@@ -111,10 +112,8 @@
             </div>
         </aside>
 
-        <!-- MAIN CONTENT -->
         <main class="flex-1 flex flex-col overflow-hidden relative">
             
-            <!-- HEADER -->
             <header class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200/60 flex items-center justify-between px-6 lg:px-10 shrink-0 sticky top-0 z-20">
                 <div>
                     <h2 class="text-xl font-bold text-slate-800 font-oswald hidden md:block">Mi Aula Virtual</h2>
@@ -136,36 +135,28 @@
                 </div>
             </header>
 
-            <!-- SCROLLABLE CONTENT AREA -->
             <div class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar relative">
                 
-                <!-- === SECCIÓN INICIO === -->
                 <div id="section-home" class="max-w-7xl mx-auto flex flex-col gap-8 fade-in">
                     
-                    <!-- COLUMNA ÚNICA (Banner + Académico) -->
                     <div class="flex-1 flex flex-col gap-6">
                         
-                        <!-- Banner Bienvenida -->
                         <div class="bg-slate-900 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden group">
                             <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                 <div>
                                     <h3 class="text-3xl font-bold font-oswald mb-2">¡Bienvenido! 👋</h3>
                                     <p class="text-slate-300 text-sm max-w-md leading-relaxed">¿Listo para mejorar tu ajedrez hoy? Revisa tu horario y prepárate para tu próxima clase.</p>
                                 </div>
-                                <!-- BOTÓN MODIFICADO PARA ABRIR CALENDARIO -->
                                 <button onclick="toggleCalendar(true)" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2">
                                     <i data-lucide="calendar" class="w-4 h-4"></i>
                                     Ver Calendario
                                 </button>
                             </div>
-                            <!-- Logo y Decoración -->
                             <img src="https://i.postimg.cc/xTd0NgKW/NEXUS-CHESS-BLANCO.png" class="absolute -right-10 -bottom-16 w-64 h-64 opacity-[0.07] rotate-12 object-contain pointer-events-none group-hover:scale-105 transition-transform duration-700">
                             <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 blur-[80px] rounded-full pointer-events-none"></div>
                         </div>
 
-                        <!-- Grid Académico -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
-                            <!-- Horarios -->
                             <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
                                 <h4 class="font-bold text-slate-800 flex items-center gap-3 mb-6 text-sm uppercase tracking-wide">
                                     <div class="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
@@ -191,7 +182,6 @@
                                 </div>
                             </div>
 
-                            <!-- Asistencia -->
                             <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
                                 <h4 class="font-bold text-slate-800 flex items-center gap-3 mb-6 text-sm uppercase tracking-wide">
                                     <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
@@ -229,7 +219,6 @@
                     </div>
                 </div>
 
-                <!-- === SECCIÓN PAGOS === -->
                 <div id="section-payments" class="hidden max-w-4xl mx-auto fade-in h-full flex-col justify-center">
                     <div class="bg-white p-8 rounded-3xl shadow-lg border border-slate-100 flex flex-col md:flex-row gap-8 items-center">
                         <div class="w-full md:w-1/2">
@@ -275,11 +264,9 @@
         </main>
     </div>
 
-    <!-- MODAL CALENDARIO -->
     <div id="calendar-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center fade-in">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="toggleCalendar(false)"></div>
         <div class="relative bg-white rounded-3xl p-6 shadow-2xl w-full max-w-sm mx-4 transform transition-all scale-100 overflow-hidden">
-            <!-- Cabecera del calendario -->
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h4 class="text-xl font-bold text-slate-800 font-oswald">ENERO 2026</h4>
@@ -290,7 +277,6 @@
                 </button>
             </div>
             
-            <!-- Grid del Calendario -->
             <div class="calendar-grid mb-2">
                 <div class="calendar-head">Lu</div>
                 <div class="calendar-head">Ma</div>
@@ -301,8 +287,7 @@
                 <div class="calendar-head">Do</div>
             </div>
             <div id="calendar-days" class="calendar-grid">
-                <!-- Se llena con JS -->
-            </div>
+                </div>
             
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
                 <p class="text-xs text-slate-400">Las fechas marcadas en <span class="text-blue-600 font-bold">azul</span> son tus días de clase.</p>
@@ -356,7 +341,6 @@
             daysContainer.innerHTML = '';
 
             // Enero 2026
-            // 1 de Enero 2026 es Jueves (Thursday).
             const startDayIndex = 3; // Jueves
             const totalDays = 31;
 
@@ -370,13 +354,10 @@
                 dayEl.innerText = day;
                 dayEl.className = 'calendar-day';
                 
-                // 0=Lu, 1=Ma, 2=Mi, 3=Ju, 4=Vi, 5=Sa, 6=Do
                 const currentWeekDay = (startDayIndex + day - 1) % 7;
-                
-                if (currentWeekDay === 0 || currentWeekDay === 2) { // Lunes o Miércoles
+                if (currentWeekDay === 0 || currentWeekDay === 2) { 
                     dayEl.classList.add('active');
                 }
-
                 daysContainer.appendChild(dayEl);
             }
         }
@@ -454,22 +435,19 @@
             document.getElementById('main-app').classList.remove('hidden');
             document.getElementById('main-app').classList.add('fade-in');
 
-            // --- PROTECCIÓN DE DATOS ---
             const fName = student.studentName || '';
             const lName = student.studentLastName || '';
             
             document.getElementById('header-name').innerText = `${fName} ${lName}`;
             document.getElementById('header-code').innerText = student.discountCode || `STU-${student.id}`;
             
-            // --- HORARIO: INTENTA LEER 'schedule' O 'horario' O MUESTRA MENSAJE POR DEFECTO ---
             const scheduleText = student.schedule || student.horario || 'Por definir';
             document.getElementById('dash-schedule').innerText = scheduleText;
             
-            // --- MODALIDAD ---
             const modalityText = student.modality || 'Presencial'; 
             document.getElementById('dash-modality').innerText = `Modalidad ${modalityText}`;
             
-            // --- ENLACE DE CLASE ---
+            // --- ENLACE DE CLASE (EN VIVO) ---
             let classInfo = null;
             if (window.systemData.classrooms) {
                 classInfo = window.systemData.classrooms.find(c => c.id === student.assignedClassId);
@@ -488,9 +466,18 @@
                 document.getElementById('no-link-msg').classList.remove('hidden');
             }
 
+            // --- NUEVA LÓGICA: ENLACE DE CLASES GRABADAS ---
+            const recordedBtn = document.getElementById('nav-recorded');
+            if (student.recordedClassesLink && student.recordedClassesLink.length > 5) {
+                recordedBtn.href = student.recordedClassesLink;
+                recordedBtn.classList.remove('opacity-50', 'pointer-events-none');
+            } else {
+                recordedBtn.href = "#";
+                recordedBtn.classList.add('opacity-50', 'pointer-events-none');
+            }
+
             // --- PAGOS ---
             document.getElementById('dash-renewal').innerText = student.renewalDate || '---';
-            // Protección para paymentAmount
             const amount = student.paymentAmount !== undefined ? student.paymentAmount : 0;
             document.getElementById('dash-amount').innerText = Number(amount).toFixed(2);
             
@@ -513,7 +500,6 @@
             document.getElementById('stat-late').innerText = late;
             document.getElementById('stat-absent').innerText = absent;
             
-            // Protección para la barra de progreso
             if (total > 0) {
                 const percentage = (present / total) * 100;
                 document.getElementById('ring-present').setAttribute('stroke-dasharray', `${percentage}, 100`);
