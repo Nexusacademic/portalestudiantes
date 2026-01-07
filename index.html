@@ -93,7 +93,8 @@
                     <span class="hidden lg:block">Mis Pagos</span>
                 </button>
 
-                <a id="nav-recorded" href="#" target="_blank" class="flex items-center gap-4 px-4 py-3.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 rounded-2xl transition-all font-medium text-sm group">
+                <!-- Botón Clases Grabadas vinculado directamente al Drive -->
+                <a href="https://drive.google.com/drive/folders/1BBPEQ5BsIYwOHJiqOezVPZ-jOtLjDiOq?usp=sharing" target="_blank" class="flex items-center gap-4 px-4 py-3.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 rounded-2xl transition-all font-medium text-sm group">
                     <i data-lucide="play-circle" class="w-5 h-5 group-hover:scale-110 transition-transform text-slate-400 group-hover:text-red-500"></i>
                     <span class="hidden lg:block">Clases Grabadas</span>
                 </a>
@@ -464,16 +465,6 @@
                 meetBtn.classList.add('opacity-50', 'pointer-events-none', 'bg-slate-400');
                 meetBtn.classList.remove('bg-slate-900', 'hover:bg-slate-800');
                 document.getElementById('no-link-msg').classList.remove('hidden');
-            }
-
-            // --- NUEVA LÓGICA: ENLACE DE CLASES GRABADAS ---
-            const recordedBtn = document.getElementById('nav-recorded');
-            if (student.recordedClassesLink && student.recordedClassesLink.length > 5) {
-                recordedBtn.href = student.recordedClassesLink;
-                recordedBtn.classList.remove('opacity-50', 'pointer-events-none');
-            } else {
-                recordedBtn.href = "#";
-                recordedBtn.classList.add('opacity-50', 'pointer-events-none');
             }
 
             // --- PAGOS ---
