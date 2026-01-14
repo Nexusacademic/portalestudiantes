@@ -62,12 +62,16 @@
         /* Group Chat Specifics */
         .msg-bubble-self { background-color: #2563eb; color: white; border-radius: 16px 16px 0 16px; margin-left: auto; max-width: 80%; }
         .msg-bubble-other { background-color: #f1f5f9; color: #1e293b; border-radius: 16px 16px 16px 0; margin-right: auto; max-width: 80%; }
+        
+        /* Mobile Sidebar Transitions */
+        .sidebar-mobile-open { transform: translateX(0) !important; }
+        .backdrop-visible { opacity: 1 !important; pointer-events: auto !important; }
     </style>
 </head>
 <body class="text-slate-600 h-screen overflow-hidden flex flex-col antialiased selection:bg-blue-600 selection:text-white">
 
     <!-- LOGIN SCREEN -->
-    <div id="login-screen" class="fixed inset-0 z-50 flex bg-white">
+    <div id="login-screen" class="fixed inset-0 z-[60] flex bg-white">
         <!-- Left Side: Image/Brand -->
         <div class="hidden lg:flex lg:w-1/2 relative bg-slate-900 overflow-hidden items-center justify-center">
             <div class="absolute inset-0 opacity-40">
@@ -131,31 +135,39 @@
     </div>
 
     <!-- MAIN APP INTERFACE -->
-    <div id="main-app" class="hidden flex h-full bg-[#f8fafc]">
+    <div id="main-app" class="hidden flex h-full bg-[#f8fafc] relative">
         
+        <!-- MOBILE BACKDROP -->
+        <div id="mobile-backdrop" onclick="toggleMobileMenu(false)" class="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 lg:hidden"></div>
+
         <!-- SIDEBAR -->
-        <aside class="hidden lg:flex flex-col w-64 bg-slate-900 text-slate-300 h-full fixed left-0 top-0 z-30 shadow-2xl shadow-slate-900/50">
+        <!-- CORRECCIÓN: Eliminado lg:static, ahora es fixed siempre. Esto arregla el "doble espacio" -->
+        <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-300 flex flex-col h-full transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-2xl lg:shadow-2xl shadow-slate-900/50">
             <!-- Brand -->
-            <div class="h-20 flex items-center gap-3 px-6 border-b border-slate-800">
+            <div class="h-20 flex items-center gap-3 px-6 border-b border-slate-800 relative">
                 <img src="https://i.postimg.cc/7ZMDp79f/LOGO-PNG-NEXUS-CHESS-sin-letras.png" class="w-8 h-8 object-contain brightness-0 invert">
                 <span class="font-bold text-white font-oswald text-xl tracking-wider">NEXUS CHESS</span>
+                
+                <!-- Close Button (Mobile Only) -->
+                <button onclick="toggleMobileMenu(false)" class="lg:hidden absolute right-4 text-slate-400 hover:text-white">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
             </div>
 
             <!-- Navigation -->
             <div class="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
                 <p class="px-4 text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Principal</p>
                 
-                <button onclick="showSection('home')" id="nav-home" class="sidebar-link active w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
+                <button onclick="showSection('home'); toggleMobileMenu(false)" id="nav-home" class="sidebar-link active w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
                     <i data-lucide="layout-grid" class="w-5 h-5"></i>
                     Dashboard
                 </button>
-                <button onclick="showSection('payments')" id="nav-payments" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
+                <button onclick="showSection('payments'); toggleMobileMenu(false)" id="nav-payments" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
                     <i data-lucide="credit-card" class="w-5 h-5"></i>
                     Pagos
                 </button>
                 
-                <!-- BOTÓN CHAT GRUPAL (NUEVO) -->
-                <button onclick="showSection('chat')" id="nav-chat" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
+                <button onclick="showSection('chat'); toggleMobileMenu(false)" id="nav-chat" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
                     <i data-lucide="message-circle" class="w-5 h-5"></i>
                     Chat Grupal
                 </button>
@@ -176,9 +188,9 @@
                 </a>
             </div>
 
-            <!-- ASISTENTE IA (ENCIMA DEL PERFIL) -->
+            <!-- ASISTENTE IA -->
             <div class="px-3 pb-3 bg-slate-900">
-                <button onclick="toggleChat(true)" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-blue-300 hover:text-white group relative bg-slate-800/50 border border-slate-700/50 hover:border-blue-500/50 transition-all">
+                <button onclick="toggleChat(true); toggleMobileMenu(false)" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-blue-300 hover:text-white group relative bg-slate-800/50 border border-slate-700/50 hover:border-blue-500/50 transition-all">
                     <i data-lucide="sparkles" class="w-5 h-5 text-yellow-400 group-hover:text-yellow-300 animate-pulse"></i>
                     <div>
                         Asistente IA
@@ -187,7 +199,7 @@
                 </button>
             </div>
 
-            <!-- User Profile (Bottom Sidebar) -->
+            <!-- User Profile -->
             <div class="p-4 border-t border-slate-800 bg-slate-900/50">
                 <div class="flex items-center gap-3 mb-3">
                     <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-blue-900/50">
@@ -205,12 +217,18 @@
         </aside>
 
         <!-- MAIN CONTENT -->
-        <main class="flex-1 flex flex-col h-full lg:ml-64 relative">
+        <!-- Added lg:ml-64 so it respects the sidebar width on desktop, but takes full width on mobile -->
+        <main class="flex-1 flex flex-col h-full lg:ml-64 relative transition-all duration-300">
             
             <!-- HEADER -->
             <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 lg:px-8 sticky top-0 z-20">
+                
+                <!-- Mobile Menu Button (New) -->
                 <div class="flex items-center gap-4 lg:hidden">
-                    <img src="https://i.postimg.cc/7ZMDp79f/LOGO-PNG-NEXUS-CHESS-sin-letras.png" class="w-8 h-8">
+                    <button onclick="toggleMobileMenu(true)" class="p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <img src="https://i.postimg.cc/7ZMDp79f/LOGO-PNG-NEXUS-CHESS-sin-letras.png" class="w-8 h-8 object-contain">
                 </div>
                 
                 <div class="flex-1"></div>
@@ -546,6 +564,27 @@
                 checkSession(); 
             }
         });
+
+        // ---------------- MOBILE MENU LOGIC ----------------
+        window.toggleMobileMenu = function(show) {
+            const sidebar = document.getElementById('app-sidebar');
+            const backdrop = document.getElementById('mobile-backdrop');
+            
+            if (show) {
+                sidebar.classList.add('sidebar-mobile-open');
+                backdrop.classList.remove('hidden');
+                // Use setTimeout to allow display:block to apply before transition
+                setTimeout(() => {
+                    backdrop.classList.add('backdrop-visible');
+                }, 10);
+            } else {
+                sidebar.classList.remove('sidebar-mobile-open');
+                backdrop.classList.remove('backdrop-visible');
+                setTimeout(() => {
+                    backdrop.classList.add('hidden');
+                }, 300);
+            }
+        }
 
         // ---------------- GROUP CHAT LOGIC ----------------
         
