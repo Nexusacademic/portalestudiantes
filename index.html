@@ -66,6 +66,9 @@
         /* Mobile Sidebar Transitions */
         .sidebar-mobile-open { transform: translateX(0) !important; }
         .backdrop-visible { opacity: 1 !important; pointer-events: auto !important; }
+
+        /* Drag and Drop Zone */
+        .upload-zone.dragover { background-color: #eff6ff; border-color: #3b82f6; border-style: solid; }
     </style>
 </head>
 <body class="text-slate-600 h-screen overflow-hidden flex flex-col antialiased selection:bg-blue-600 selection:text-white">
@@ -141,7 +144,6 @@
         <div id="mobile-backdrop" onclick="toggleMobileMenu(false)" class="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 lg:hidden"></div>
 
         <!-- SIDEBAR -->
-        <!-- CORRECCIÓN: Eliminado lg:static, ahora es fixed siempre. Esto arregla el "doble espacio" -->
         <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-300 flex flex-col h-full transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-2xl lg:shadow-2xl shadow-slate-900/50">
             <!-- Brand -->
             <div class="h-20 flex items-center gap-3 px-6 border-b border-slate-800 relative">
@@ -186,6 +188,11 @@
                     <i data-lucide="book-open" class="w-5 h-5"></i>
                     Material de Estudio
                 </a>
+                <!-- NUEVO BOTÓN TAREAS -->
+                <button onclick="showSection('tasks'); toggleMobileMenu(false)" id="nav-tasks" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
+                    <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+                    Tareas
+                </button>
             </div>
 
             <!-- ASISTENTE IA -->
@@ -217,13 +224,12 @@
         </aside>
 
         <!-- MAIN CONTENT -->
-        <!-- Added lg:ml-64 so it respects the sidebar width on desktop, but takes full width on mobile -->
         <main class="flex-1 flex flex-col h-full lg:ml-64 relative transition-all duration-300">
             
             <!-- HEADER -->
             <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 lg:px-8 sticky top-0 z-20">
                 
-                <!-- Mobile Menu Button (New) -->
+                <!-- Mobile Menu Button -->
                 <div class="flex items-center gap-4 lg:hidden">
                     <button onclick="toggleMobileMenu(true)" class="p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
                         <i data-lucide="menu" class="w-6 h-6"></i>
@@ -251,7 +257,7 @@
                 <!-- HOME SECTION -->
                 <div id="section-home" class="max-w-6xl mx-auto space-y-8 fade-in">
                     
-                    <!-- WELCOME BANNER (SIN VENCIMIENTO) -->
+                    <!-- WELCOME BANNER -->
                     <div class="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-8 text-white shadow-lg relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
                         <div class="relative z-10">
                             <h2 class="text-3xl font-bold font-oswald mb-2">¡Hola, <span id="welcome-name">Campeón</span>! 👋</h2>
@@ -352,7 +358,7 @@
                         <!-- COLUMNA DERECHA (1/3) -->
                         <div class="space-y-8">
                             
-                            <!-- CALENDAR WIDGET (RESTAURADO) -->
+                            <!-- CALENDAR WIDGET -->
                             <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
                                 <div class="flex items-center justify-between mb-4">
                                     <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase">ENERO 2026</h3>
@@ -445,7 +451,7 @@
                      </div>
                 </div>
 
-                <!-- CHAT GRUPAL SECTION (NUEVO) -->
+                <!-- CHAT GRUPAL SECTION -->
                 <div id="section-chat" class="hidden h-full flex flex-col fade-in">
                     <div class="flex-none p-6 border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
                         <div class="flex justify-between items-center max-w-5xl mx-auto">
@@ -479,6 +485,30 @@
                                 <i data-lucide="send" class="w-5 h-5"></i>
                             </button>
                         </div>
+                    </div>
+                </div>
+
+                <!-- SECTION TAREAS (NUEVO) -->
+                <div id="section-tasks" class="hidden max-w-5xl mx-auto fade-in space-y-6">
+                    <!-- Header -->
+                    <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800 font-oswald">Mis Tareas</h2>
+                            <p class="text-slate-500 text-sm">Sube tus evidencias y revisa tus calificaciones</p>
+                        </div>
+                        <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center">
+                            <i data-lucide="folder-open" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+
+                    <!-- Task List Container -->
+                    <div id="tasks-container" class="space-y-4">
+                        <!-- Dynamic content -->
+                    </div>
+                    
+                    <div id="tasks-empty" class="hidden flex flex-col items-center justify-center py-12 text-slate-400">
+                        <i data-lucide="clipboard-check" class="w-16 h-16 mb-4 opacity-30"></i>
+                        <p class="font-medium">¡Estás al día! No hay tareas pendientes.</p>
                     </div>
                 </div>
 
@@ -532,7 +562,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, push, set, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        // Added Storage Import
+        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB_JqJuavM7TBvnuWtFW55wxqFSWMxrk3Q",
@@ -547,6 +579,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        const storage = getStorage(app);
 
         // GEMINI API
         const apiKey = "";
@@ -555,6 +588,7 @@
         window.systemData = null;
         window.currentUser = null;
         window.currentCalendarDate = new Date(2026, 0, 1); 
+        window.selectedFiles = {}; // Store selected files for tasks
 
         const dbRef = ref(db, 'academy_v1');
         onValue(dbRef, (snapshot) => {
@@ -573,7 +607,6 @@
             if (show) {
                 sidebar.classList.add('sidebar-mobile-open');
                 backdrop.classList.remove('hidden');
-                // Use setTimeout to allow display:block to apply before transition
                 setTimeout(() => {
                     backdrop.classList.add('backdrop-visible');
                 }, 10);
@@ -587,14 +620,12 @@
         }
 
         // ---------------- GROUP CHAT LOGIC ----------------
-        
         window.initGroupChat = function() {
             if (!window.currentUser || !window.currentUser.assignedClassId) return;
             
             const classId = window.currentUser.assignedClassId;
             const chatRef = ref(db, `group_chats/${classId}`);
             
-            // Listen for new messages
             onValue(chatRef, (snapshot) => {
                 const messages = snapshot.val();
                 const container = document.getElementById('group-chat-messages');
@@ -638,7 +669,6 @@
                     container.appendChild(bubble);
                 });
                 
-                // Scroll to bottom
                 const scrollContainer = document.getElementById('group-chat-container');
                 scrollContainer.scrollTop = scrollContainer.scrollHeight;
             });
@@ -666,6 +696,256 @@
             input.value = '';
         }
 
+        // ---------------- TASK & FILE UPLOAD LOGIC ----------------
+        
+        // Helper: Handle file selection via Input
+        window.handleFileSelect = function(event, taskId) {
+            const file = event.target.files[0];
+            processSelectedFile(file, taskId);
+        }
+
+        // Helper: Drag & Drop Handlers
+        window.handleDragOver = function(event) {
+            event.preventDefault(); // Necessary to allow dropping
+            event.currentTarget.classList.add('dragover');
+        }
+
+        window.handleDragLeave = function(event) {
+            event.currentTarget.classList.remove('dragover');
+        }
+
+        window.handleDrop = function(event, taskId) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('dragover');
+            
+            if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+                const file = event.dataTransfer.files[0];
+                processSelectedFile(file, taskId);
+                event.dataTransfer.clearData();
+            }
+        }
+
+        // Helper: Process and Preview File
+        function processSelectedFile(file, taskId) {
+            if (!file || !file.type.startsWith('image/')) {
+                alert("Por favor, selecciona solo archivos de imagen (JPG, PNG).");
+                return;
+            }
+
+            window.selectedFiles[taskId] = file;
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const previewImg = document.getElementById(`preview-img-${taskId}`);
+                const previewContainer = document.getElementById(`preview-container-${taskId}`);
+                const btnUpload = document.getElementById(`btn-upload-${taskId}`);
+                
+                previewImg.src = e.target.result;
+                previewContainer.classList.remove('hidden');
+                
+                // Enable button
+                btnUpload.disabled = false;
+                btnUpload.classList.remove('bg-slate-200', 'text-slate-400', 'cursor-not-allowed');
+                btnUpload.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700', 'shadow-lg', 'shadow-blue-600/20');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        window.clearFile = function(event, taskId) {
+            event.stopPropagation(); // Prevent opening file dialog
+            delete window.selectedFiles[taskId];
+            
+            document.getElementById(`file-input-${taskId}`).value = ''; // Reset input
+            document.getElementById(`preview-container-${taskId}`).classList.add('hidden');
+            document.getElementById(`preview-img-${taskId}`).src = '';
+
+            const btnUpload = document.getElementById(`btn-upload-${taskId}`);
+            btnUpload.disabled = true;
+            btnUpload.classList.add('bg-slate-200', 'text-slate-400', 'cursor-not-allowed');
+            btnUpload.classList.remove('bg-blue-600', 'text-white', 'hover:bg-blue-700', 'shadow-lg', 'shadow-blue-600/20');
+        }
+
+        window.renderTasks = function() {
+            const container = document.getElementById('tasks-container');
+            const emptyState = document.getElementById('tasks-empty');
+            
+            if(!window.currentUser || !window.currentUser.assignedClassId) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            const classId = window.currentUser.assignedClassId;
+            const allTasks = window.systemData.tasks ? (window.systemData.tasks[classId] || {}) : {};
+            const taskIds = Object.keys(allTasks).sort().reverse();
+
+            container.innerHTML = '';
+
+            if(taskIds.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                taskIds.forEach(taskId => {
+                    const task = allTasks[taskId];
+                    const studentId = window.currentUser.id;
+                    const submission = (task.submissions && task.submissions[studentId]) ? task.submissions[studentId] : null;
+                    const status = submission ? submission.status : 'PENDIENTE';
+                    const grade = submission ? submission.grade : null;
+                    const feedback = submission ? submission.feedback : null;
+                    
+                    let statusBadge = '';
+                    let actionArea = '';
+                    let cardBorder = 'border-slate-200';
+
+                    if (status === 'PENDIENTE' || status === 'OBSERVADO') {
+                        // Color adjustments for OBSERVADO
+                        const isObserved = status === 'OBSERVADO';
+                        if (isObserved) {
+                            statusBadge = `<span class="bg-red-100 text-red-600 text-xs font-bold px-3 py-1 rounded-full uppercase">Observado</span>`;
+                            cardBorder = 'border-red-200 bg-red-50/20';
+                        } else {
+                            statusBadge = `<span class="bg-slate-100 text-slate-600 text-xs font-bold px-3 py-1 rounded-full uppercase">Pendiente</span>`;
+                        }
+
+                        actionArea = `
+                            <div class="mt-4 pt-4 border-t ${isObserved ? 'border-red-100' : 'border-slate-100'}">
+                                ${isObserved ? `
+                                    <div class="flex items-center gap-2 text-red-600 font-bold text-sm mb-2">
+                                        <i data-lucide="alert-circle" class="w-4 h-4"></i> Requiere corrección
+                                    </div>
+                                    ${feedback ? `<p class="text-sm text-slate-600 bg-white/50 p-3 rounded-lg border border-red-100 italic mb-3">"${feedback}"</p>` : ''}
+                                ` : `<label class="block text-xs font-bold text-slate-500 uppercase mb-2">Subir Evidencia (Foto)</label>`}
+                                
+                                <input type="file" id="file-input-${taskId}" class="hidden" accept="image/*" onchange="handleFileSelect(event, '${taskId}')">
+                                
+                                <div id="drop-zone-${taskId}" 
+                                     class="upload-zone border-2 border-dashed ${isObserved ? 'border-red-300 bg-white/50' : 'border-slate-300'} rounded-xl p-6 text-center cursor-pointer hover:bg-slate-50 transition-colors relative group"
+                                     onclick="document.getElementById('file-input-${taskId}').click()"
+                                     ondragover="handleDragOver(event)"
+                                     ondragleave="handleDragLeave(event)"
+                                     ondrop="handleDrop(event, '${taskId}')">
+                                     
+                                    <div id="preview-container-${taskId}" class="hidden absolute inset-0 bg-slate-50 rounded-xl flex items-center justify-center p-2 z-10">
+                                        <img id="preview-img-${taskId}" class="max-h-full max-w-full object-contain rounded-lg shadow-sm">
+                                        <button onclick="clearFile(event, '${taskId}')" class="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors shadow-sm">
+                                            <i data-lucide="x" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+
+                                    <div class="pointer-events-none">
+                                        <div class="w-12 h-12 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                                            <i data-lucide="image-plus" class="w-6 h-6"></i>
+                                        </div>
+                                        <p class="text-sm font-bold text-slate-600">Arrastra una imagen aquí</p>
+                                        <p class="text-xs text-slate-400 mt-1">o toca para seleccionar</p>
+                                    </div>
+                                </div>
+
+                                <button id="btn-upload-${taskId}" onclick="uploadTaskFile('${taskId}')" class="w-full mt-3 bg-slate-200 text-slate-400 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-not-allowed" disabled>
+                                    <span>${isObserved ? 'Enviar Corrección' : 'Enviar Tarea'}</span>
+                                    <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+                                </button>
+                                
+                                <div id="progress-bar-${taskId}" class="hidden w-full bg-slate-100 rounded-full h-2 mt-3 overflow-hidden">
+                                    <div id="progress-fill-${taskId}" class="bg-blue-600 h-full w-0 transition-all duration-300"></div>
+                                </div>
+                            </div>
+                        `;
+                    } else if (status === 'ENTREGADO') {
+                         statusBadge = `<span class="bg-blue-100 text-blue-600 text-xs font-bold px-3 py-1 rounded-full uppercase">Entregado</span>`;
+                         cardBorder = 'border-blue-200 bg-blue-50/20';
+                         actionArea = `
+                            <div class="mt-4 pt-4 border-t border-slate-100 flex items-center gap-2 text-sm text-slate-500">
+                                <i data-lucide="check-circle" class="w-4 h-4 text-blue-500"></i>
+                                <span>Tarea enviada. <a href="${submission.fileUrl}" target="_blank" class="text-blue-500 underline font-bold">Ver archivo</a></span>
+                            </div>
+                        `;
+                    } else if (status === 'APROBADO') {
+                        statusBadge = `<span class="bg-emerald-100 text-emerald-600 text-xs font-bold px-3 py-1 rounded-full uppercase">Aprobado</span>`;
+                        cardBorder = 'border-emerald-200 bg-emerald-50/20';
+                        actionArea = `
+                            <div class="mt-4 pt-4 border-t border-emerald-100">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs font-bold text-emerald-600 uppercase">Calificación</span>
+                                    <span class="text-lg font-bold text-emerald-700">${grade || '20'}</span>
+                                </div>
+                                ${feedback ? `<p class="text-sm text-slate-600 bg-white/50 p-3 rounded-lg border border-emerald-100 italic">"${feedback}"</p>` : ''}
+                                <div class="mt-2">
+                                     <a href="${submission.fileUrl}" target="_blank" class="text-xs text-emerald-600 underline font-bold">Ver entrega</a>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    const card = document.createElement('div');
+                    card.className = `bg-white p-6 rounded-2xl border ${cardBorder} shadow-sm transition-all`;
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-800">${task.title}</h3>
+                                <p class="text-xs text-slate-500 font-medium">Vence: ${task.date}</p>
+                            </div>
+                            ${statusBadge}
+                        </div>
+                        ${actionArea}
+                    `;
+                    container.appendChild(card);
+                });
+            }
+            lucide.createIcons();
+        }
+
+        window.uploadTaskFile = function(taskId) {
+            const file = window.selectedFiles[taskId];
+            if (!file) return;
+
+            // UI Feedback
+            const btn = document.getElementById(`btn-upload-${taskId}`);
+            const progressBar = document.getElementById(`progress-bar-${taskId}`);
+            const progressFill = document.getElementById(`progress-fill-${taskId}`);
+
+            btn.disabled = true;
+            btn.innerHTML = `<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400"></div> Subiendo...`;
+            progressBar.classList.remove('hidden');
+            progressFill.style.width = '30%';
+
+            const classId = window.currentUser.assignedClassId;
+            const studentId = window.currentUser.id;
+            const fileName = `homework_${Date.now()}_${file.name}`;
+            
+            // Storage Reference: homework_uploads/CLASS_ID/TASK_ID/STUDENT_ID/filename
+            const fileRef = storageRef(storage, `homework_uploads/${classId}/${taskId}/${studentId}/${fileName}`);
+
+            uploadBytes(fileRef, file).then((snapshot) => {
+                progressFill.style.width = '70%';
+                return getDownloadURL(snapshot.ref);
+            }).then((url) => {
+                progressFill.style.width = '100%';
+                
+                // Update Database
+                const submissionRef = ref(db, `academy_v1/tasks/${classId}/${taskId}/submissions/${studentId}`);
+                
+                return update(submissionRef, {
+                    status: 'ENTREGADO',
+                    fileUrl: url,
+                    fileName: file.name,
+                    timestamp: Date.now()
+                });
+            }).then(() => {
+                // Success
+                delete window.selectedFiles[taskId];
+                alert("¡Tarea subida con éxito!");
+                // Force UI refresh (listener handles this usually, but to be sure)
+                // renderTasks(); - Not needed if onValue triggers
+            }).catch((error) => {
+                console.error("Error uploading:", error);
+                alert("Error al subir la imagen. Verifica tu conexión.");
+                btn.disabled = false;
+                btn.innerHTML = `<span>Reintentar</span> <i data-lucide="refresh-cw" class="w-4 h-4"></i>`;
+                progressBar.classList.add('hidden');
+            });
+        }
 
         // ---------------- TOGGLE QR ----------------
         window.toggleQR = function(show) {
@@ -864,22 +1144,27 @@
 
         // NAVIGATION
         window.showSection = function(sectionId) {
+            // Hide all sections
             document.getElementById('section-home').classList.add('hidden');
             document.getElementById('section-payments').classList.add('hidden');
             document.getElementById('section-chat').classList.add('hidden');
+            document.getElementById('section-tasks').classList.add('hidden');
             
+            // Buttons
             const btnHome = document.getElementById('nav-home');
             const btnPay = document.getElementById('nav-payments');
             const btnChat = document.getElementById('nav-chat');
+            const btnTasks = document.getElementById('nav-tasks');
             
-            // Reset ALL
-            [btnHome, btnPay, btnChat].forEach(btn => {
+            // Reset Styles
+            [btnHome, btnPay, btnChat, btnTasks].forEach(btn => {
                 if(btn) {
                     btn.classList.remove('bg-blue-50/80', 'text-blue-700', 'border-blue-100');
                     btn.classList.add('text-slate-500', 'hover:bg-slate-50', 'hover:text-slate-800');
                 }
             });
 
+            // Logic per section
             if(sectionId === 'home') {
                 document.getElementById('section-home').classList.remove('hidden');
                 btnHome.classList.add('bg-blue-50/80', 'text-blue-700', 'border-blue-100');
@@ -893,8 +1178,12 @@
                 document.getElementById('section-chat').classList.remove('hidden');
                 btnChat.classList.add('bg-blue-50/80', 'text-blue-700', 'border-blue-100');
                 btnChat.classList.remove('text-slate-500', 'hover:bg-slate-50', 'hover:text-slate-800');
-                // Init chat listeners when section opens
                 initGroupChat();
+            } else if (sectionId === 'tasks') {
+                document.getElementById('section-tasks').classList.remove('hidden');
+                btnTasks.classList.add('bg-blue-50/80', 'text-blue-700', 'border-blue-100');
+                btnTasks.classList.remove('text-slate-500', 'hover:bg-slate-50', 'hover:text-slate-800');
+                renderTasks();
             }
         }
 
@@ -984,6 +1273,11 @@
             const amount = student.paymentAmount !== undefined ? student.paymentAmount : 0;
             document.getElementById('dash-amount').innerText = Number(amount).toFixed(2);
             
+            // Check if active tasks to notify
+            if(window.systemData.tasks && student.assignedClassId) {
+                // Could add a notification dot logic here later
+            }
+
             calculateAttendance(student.id);
             renderCalendar();
             lucide.createIcons();
