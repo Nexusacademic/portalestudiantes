@@ -68,7 +68,6 @@
 </head>
 <body class="text-slate-600 h-screen overflow-hidden flex flex-col antialiased selection:bg-blue-600 selection:text-white">
 
-    <!-- LOGIN SCREEN -->
     <div id="login-screen" class="fixed inset-0 z-[60] flex bg-white">
         <div class="hidden lg:flex lg:w-1/2 relative bg-slate-900 overflow-hidden items-center justify-center">
             <div class="absolute inset-0 opacity-40">
@@ -130,7 +129,6 @@
         </div>
     </div>
 
-    <!-- MAIN APP INTERFACE -->
     <div id="main-app" class="hidden flex h-full bg-[#f8fafc] relative">
         <div id="mobile-backdrop" onclick="toggleMobileMenu(false)" class="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 lg:hidden"></div>
 
@@ -207,7 +205,6 @@
             </header>
 
             <div class="flex-1 overflow-y-auto p-6 lg:p-8 custom-scrollbar">
-                <!-- HOME SECTION -->
                 <div id="section-home" class="max-w-6xl mx-auto space-y-8 fade-in">
                     <div class="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-8 text-white shadow-lg relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
                         <div class="relative z-10">
@@ -311,7 +308,6 @@
                     </div>
                 </div>
 
-                <!-- PAYMENTS SECTION -->
                 <div id="section-payments" class="hidden max-w-4xl mx-auto fade-in h-full flex-col justify-center">
                      <div class="bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden">
                         <div class="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
@@ -374,7 +370,6 @@
                      </div>
                 </div>
 
-                <!-- CHAT GRUPAL SECTION -->
                 <div id="section-chat" class="hidden h-full flex flex-col fade-in">
                     <div class="flex-none p-6 border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
                         <div class="flex justify-between items-center max-w-5xl mx-auto">
@@ -405,7 +400,6 @@
                     </div>
                 </div>
 
-                <!-- SECTION TAREAS -->
                 <div id="section-tasks" class="hidden max-w-5xl mx-auto fade-in space-y-6">
                     <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
                         <div>
@@ -426,7 +420,6 @@
         </main>
     </div>
 
-    <!-- QR MODAL -->
     <div id="qr-modal" class="fixed inset-0 z-[70] hidden flex items-center justify-center">
         <div id="qr-backdrop" class="absolute inset-0 bg-slate-900/60 backdrop-blur-md opacity-0 transition-opacity duration-500 ease-out" onclick="toggleQR(false)"></div>
         <div id="qr-content" class="relative bg-white rounded-3xl p-6 shadow-2xl w-full max-w-sm mx-4 flex flex-col items-center opacity-0 scale-95 translate-y-4 transition-all duration-500 ease-out">
@@ -739,8 +732,7 @@
             lucide.createIcons();
         }
 
-        // ULTRA RÁPIDO: Limpieza de barra garantizada y subida por partes
-         // ULTRA RÁPIDO: Subida corregida compatible con Admin y Alumno
+        // ULTRA RÁPIDO: Subida corregida compatible con Admin y Alumno
         window.uploadTaskFiles = async function(taskId) {
             const files = window.selectedFiles[taskId];
             if (!files || files.length === 0) return;
@@ -807,33 +799,6 @@
                 btn.disabled = false;
                 btn.innerHTML = `<span>Reintentar</span> <i data-lucide="upload-cloud" class="w-4 h-4"></i>`;
                 lucide.createIcons();
-            }
-        }               }
-
-                // Registro final en DB
-                const submissionRef = ref(db, `academy_v1/tasks/${classId}/${taskId}/submissions/${studentId}`);
-                await update(submissionRef, {
-                    status: 'ENTREGADO',
-                    files: uploadedFiles,
-                    timestamp: Date.now(),
-                    studentName: window.currentUser.studentName
-                });
-
-                // Limpieza absoluta
-                delete window.selectedFiles[taskId];
-                progressBar.classList.add('hidden');
-                progressFill.style.width = '0%';
-                
-                // Refresco visual
-                renderTasks();
-
-            } catch (error) {
-                console.error("Fallo crítico:", error);
-                // Forzamos el cierre de la barra en caso de error
-                progressBar.classList.add('hidden');
-                progressFill.style.width = '0%';
-                btn.disabled = false;
-                btn.innerHTML = `<span>Reintentar</span> <i data-lucide="upload-cloud" class="w-4 h-4"></i>`;
             }
         }
 
