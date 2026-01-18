@@ -689,15 +689,18 @@
                     const submission = (task.submissions && task.submissions[studentId]) ? task.submissions[studentId] : null;
                     const status = submission ? submission.status : 'PENDIENTE';
                     let statusBadge = '', actionArea = '', cardBorder = 'border-slate-200';
+                   
+                    // --- CORRECCIÓN: Buscamos el texto con varios nombres posibles ---
+                    // Esto revisa si se guardó como descripción, instrucción o nota.
+                    const textContent = task.description || task.instruction || task.instructions || task.nota || task.details || "";
 
-                    // --- NUEVO: Mostrar descripción si existe ---
-                    const descriptionHtml = task.description 
+                    const descriptionHtml = textContent 
                         ? `<div class="bg-slate-50 p-4 rounded-xl text-sm text-slate-600 mb-4 border border-slate-100 leading-relaxed">
                              <span class="font-bold text-slate-700 block mb-1 text-xs uppercase tracking-wide">Instrucciones:</span>
-                             ${task.description}
+                             ${textContent}
                            </div>` 
                         : '';
-                    // --------------------------------------------
+                    // -----------------------------------------------------------------
 
                     if (status === 'PENDIENTE' || status === 'OBSERVADO') {
                         const isObserved = status === 'OBSERVADO';
