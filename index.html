@@ -479,6 +479,46 @@
             }
         });
 
+        // ---------------- HELPER: IMAGE COMPRESSION ----------------
+        // Esta función reduce el tamaño de la imagen antes de subirla para que sea ultra rápido
+        async function compressImage(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const max_size = 1200; // Tamaño máximo razonable para fotos de tareas
+                        
+                        if (width > height) {
+                            if (width > max_size) {
+                                height *= max_size / width;
+                                width = max_size;
+                            }
+                        } else {
+                            if (height > max_size) {
+                                width *= max_size / height;
+                                height = max_size;
+                            }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        canvas.toBlob((blob) => {
+                            resolve(blob);
+                        }, 'image/jpeg', 0.7); // 70% de calidad es perfecto para tareas
+                    };
+                };
+            });
+        }
+
         // ---------------- MOBILE MENU LOGIC ----------------
         window.toggleMobileMenu = function(show) {
             const sidebar = document.getElementById('app-sidebar');
@@ -701,6 +741,7 @@
             lucide.createIcons();
         }
 
+        // OPTIMIZADO: Subida en paralelo y compresión instantánea
         window.uploadTaskFiles = async function(taskId) {
             const files = window.selectedFiles[taskId];
             if (!files || files.length === 0) return;
@@ -710,26 +751,33 @@
             const progressFill = document.getElementById(`progress-fill-${taskId}`);
 
             btn.disabled = true;
-            btn.innerHTML = `<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400"></div> Subiendo fotos...`;
+            btn.innerHTML = `<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400"></div> Optimizando y subiendo...`;
             progressBar.classList.remove('hidden');
+            progressFill.style.width = '10%'; // Empieza con algo de avance visual
 
             const classId = window.currentUser.assignedClassId;
             const studentId = window.currentUser.id;
-            const uploadedFiles = [];
 
             try {
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    const fileName = `hw_${Date.now()}_${i}_${file.name}`;
+                // Paso 1: Mapear archivos a promesas de carga (SUBIDA EN PARALELO)
+                const uploadPromises = files.map(async (file, i) => {
+                    // Comprimir antes de subir (esto reduce el peso hasta un 80% sin perder calidad visual)
+                    const compressedBlob = await compressImage(file);
+                    
+                    const fileName = `hw_${Date.now()}_${i}_${file.name.split('.')[0]}.jpg`;
                     const fileRef = storageRef(storage, `homework_uploads/${classId}/${taskId}/${studentId}/${fileName}`);
                     
-                    const snapshot = await uploadBytes(fileRef, file);
+                    const snapshot = await uploadBytes(fileRef, compressedBlob);
                     const url = await getDownloadURL(snapshot.ref);
                     
-                    uploadedFiles.push({ url, name: file.name });
-                    progressFill.style.width = `${((i + 1) / files.length) * 100}%`;
-                }
+                    return { url, name: file.name };
+                });
 
+                // Ejecutar todas las cargas al mismo tiempo
+                const uploadedFiles = await Promise.all(uploadPromises);
+                progressFill.style.width = '80%';
+
+                // Paso 2: Actualizar la base de datos
                 const submissionRef = ref(db, `academy_v1/tasks/${classId}/${taskId}/submissions/${studentId}`);
                 await update(submissionRef, {
                     status: 'ENTREGADO',
@@ -738,15 +786,22 @@
                     studentName: window.currentUser.studentName
                 });
 
+                progressFill.style.width = '100%';
                 delete window.selectedFiles[taskId];
-                alert(`¡Éxito! Se han subido ${uploadedFiles.length} imágenes.`);
-                renderTasks();
+                
+                // Pequeña pausa para que el usuario vea el 100%
+                setTimeout(() => {
+                    alert(`¡Éxito! Se han subido ${uploadedFiles.length} imágenes correctamente.`);
+                    renderTasks();
+                }, 500);
+
             } catch (error) {
                 console.error(error);
-                alert("Error al subir los archivos. Intenta de nuevo.");
+                alert("Hubo un problema al subir los archivos. Por favor, intenta de nuevo.");
                 btn.disabled = false;
                 btn.innerHTML = `<span>Reintentar</span> <i data-lucide="upload-cloud" class="w-4 h-4"></i>`;
                 progressBar.classList.add('hidden');
+                progressFill.style.width = '0%';
             }
         }
 
@@ -785,17 +840,24 @@
         }
 
         window.showSection = function(sectionId) {
-            ['section-home','section-payments','section-chat','section-tasks'].forEach(s => document.getElementById(s).classList.add('hidden'));
+            ['section-home','section-payments','section-chat','section-tasks'].forEach(s => {
+                const sec = document.getElementById(s);
+                if(sec) sec.classList.add('hidden');
+            });
             ['nav-home','nav-payments','nav-chat','nav-tasks'].forEach(n => {
                 const el = document.getElementById(n);
-                el.classList.remove('active','bg-blue-50/80','text-blue-700');
-                el.classList.add('text-slate-300');
+                if(el) {
+                    el.classList.remove('active','bg-blue-50/80','text-blue-700');
+                    el.classList.add('text-slate-300');
+                }
             });
             const activeSec = document.getElementById(`section-${sectionId}`);
-            activeSec.classList.remove('hidden');
-            if(sectionId === 'payments') activeSec.classList.add('flex');
+            if(activeSec) {
+                activeSec.classList.remove('hidden');
+                if(sectionId === 'payments') activeSec.classList.add('flex');
+            }
             const activeNav = document.getElementById(`nav-${sectionId}`);
-            activeNav.classList.add('active','bg-white/10','text-white');
+            if(activeNav) activeNav.classList.add('active','bg-white/10','text-white');
             if(sectionId === 'chat') initGroupChat();
             if(sectionId === 'tasks') renderTasks();
             lucide.createIcons();
@@ -860,7 +922,8 @@
             document.getElementById('stat-late').innerText = t;
             document.getElementById('stat-absent').innerText = f;
             const perc = (p+t+f) > 0 ? Math.round((p/(p+t+f))*100) : 0;
-            document.getElementById('stat-present-percent').innerText = `${perc}%`;
+            const percEl = document.getElementById('stat-present-percent');
+            if(percEl) percEl.innerText = `${perc}%`;
             setTimeout(() => {
                 const ring = document.getElementById('ring-present');
                 if(ring) ring.setAttribute('stroke-dasharray', `${perc}, 100`);
