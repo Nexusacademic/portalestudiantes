@@ -921,6 +921,19 @@
             document.getElementById('dash-renewal-pay').innerText = student.renewalDate || '---';
 
             const cls = window.systemData.classrooms?.find(c => c.id === student.assignedClassId);
+// --- NUEVO CÓDIGO PARA GRABACIONES ---
+            const recordingsBtn = document.getElementById('side-recordings');
+            
+            // OJO: Si en tu Firebase el campo se llama diferente a 'driveLink', cámbialo aquí.
+            if (cls?.driveLink) { 
+                recordingsBtn.href = cls.driveLink;
+                recordingsBtn.target = "_blank"; // Para que abra en pestaña nueva
+                recordingsBtn.classList.remove('opacity-50', 'pointer-events-none'); 
+            } else {
+                recordingsBtn.removeAttribute('href');
+                recordingsBtn.classList.add('opacity-50', 'pointer-events-none');
+            }
+            // --------------------------------------
             const meetBtn = document.getElementById('btn-meet');
             if (cls?.meetLink) {
                 meetBtn.href = cls.meetLink;
